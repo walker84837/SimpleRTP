@@ -1,0 +1,13 @@
+# Configuration for RTP Plugin
+
+# Maximum number of attempts to find a safe location
+max-attempts: 50
+
+# Default teleportation range
+default-range: 50000
+
+# Minimum range for teleportation
+min-range: 1000
+
+# Maximum range for teleportation
+max-range: 1000000
