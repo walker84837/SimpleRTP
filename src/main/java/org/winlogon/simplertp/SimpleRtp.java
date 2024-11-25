@@ -44,6 +44,23 @@ public class SimpleRtp extends JavaPlugin {
         maxAttempts = config.getInt("max-attempts", 50);
     }
 
+    private double getMaxRange(World world) {
+        WorldBorder border = world.getWorldBorder();
+        double defaultMaxRange = border.getSize() / 2;
+    
+        FileConfiguration config = getConfig();
+        double configMaxRange = config.getDouble("max-range", defaultMaxRange);
+    
+        // Clamp the range between minRange and defaultMaxRange
+        if (configMaxRange < minRange || configMaxRange > defaultMaxRange) {
+            getLogger().warning("Configured max-range (" + configMaxRange + ") for world '"
+                + world.getName() + "' is out of bounds. Clamping to valid range.");
+            configMaxRange = Math.max(minRange, Math.min(configMaxRange, defaultMaxRange));
+        }
+    
+        return configMaxRange;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -54,19 +71,20 @@ public class SimpleRtp extends JavaPlugin {
         Player player = (Player) sender;
 
         World world = player.getWorld();
+        double maxRange = getMaxRange(world);
 
         if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
             player.sendMessage(ChatColor.GREEN + "Usage: /rtp");
             player.sendMessage(ChatColor.AQUA + "Randomly teleports you to a safe location between "
-                + minRange + " and " + world.getWorldBorder().getSize() / 2 + " blocks.");
+                + minRange + " and " + maxRange + " blocks.");
             return true;
         }
 
-        Location safeLocation = findSafeLocation(world);
+        Location safeLocation = findSafeLocation(world, maxRange);
 
         if (safeLocation != null) {
             player.teleport(safeLocation);
-            player.sendMessage(ChatColor.GOLD + "You have been teleported to a random location");
+            player.sendMessage(ChatColor.GOLD + "You have been teleported to a random location.");
         } else {
             player.sendMessage(ChatColor.RED + "Failed to find a safe location. Please try again.");
         }
@@ -74,16 +92,15 @@ public class SimpleRtp extends JavaPlugin {
         return true;
     }
 
-    private Location findSafeLocation(World world) {
+    private Location findSafeLocation(World world, double maxRange) {
         Random random = new Random();
-        WorldBorder border = world.getWorldBorder();
-        double borderSize = border.getSize() / 2; // Half-size to get the radius
 
         for (int attempts = 0; attempts < maxAttempts; attempts++) {
-            int x = random.nextInt((int) borderSize * 2) - (int) borderSize;
-            int z = random.nextInt((int) borderSize * 2) - (int) borderSize;
+            int x = random.nextInt((int) maxRange * 2) - (int) maxRange;
+            int z = random.nextInt((int) maxRange * 2) - (int) maxRange;
 
             // Ensure the location is within the border
+            WorldBorder border = world.getWorldBorder();
             if (!border.isInside(new Location(world, x, world.getHighestBlockYAt(x, z), z))) {
                 continue;
             }
@@ -118,7 +135,6 @@ public class SimpleRtp extends JavaPlugin {
         }
         return null; // No safe location found within max attempts
     }
-
 
     private boolean isSafeBlock(Material material) {
         return material.isSolid() && !UNSAFE_BLOCKS.contains(material);
