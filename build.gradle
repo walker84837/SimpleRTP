@@ -1,22 +1,20 @@
-import com.github.spotbugs.snom.SpotBugsTask
 import java.text.SimpleDateFormat
 
 plugins {
     id 'checkstyle'
-    id "com.github.spotbugs" version "6.0.26"
     id 'com.gradleup.shadow' version '8.3.5'
     id 'java'
 }
 
-group = "com.crimsonwarpedcraft.exampleplugin"
+group = "org.winlogon.simplertp"
 
+// Versioning logic (unchanged)
 static def getTime() {
     SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd-HHmm")
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     return sdf.format(new Date()).toString()
 }
 
-// Set version to version property if supplied
 String shortVersion = null
 if (hasProperty('ver')) {
     if (ver.charAt(0) == "v") {
@@ -26,7 +24,6 @@ if (hasProperty('ver')) {
     }
 }
 
-// If the tag includes "-RC-" or no tag is supplied, append "-SNAPSHOT"
 int rcIdx
 if (shortVersion == null || shortVersion == "") {
     version = getTime() + "-SNAPSHOT"
@@ -36,6 +33,7 @@ if (shortVersion == null || shortVersion == "") {
     version = shortVersion
 }
 
+// Java compatibility
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -65,10 +63,7 @@ repositories {
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT'
-    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
     implementation 'io.papermc:paperlib:1.0.8'
-    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0'
-    testCompileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
     testImplementation 'io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
@@ -84,6 +79,7 @@ processResources {
     }
 }
 
+// Configure Checkstyle
 checkstyle {
     toolVersion '10.20.1'
     maxWarnings = 0
@@ -102,15 +98,6 @@ tasks.withType(Checkstyle).configureEach {
     }
 }
 
-tasks.withType(SpotBugsTask).configureEach {
-    reports.create("html") {
-        required = true
-    }
-    reports.create("xml") {
-        required = false
-    }
-}
-
 shadowJar {
     archiveClassifier.set('')
     relocate 'io.papermc.lib', 'shadow.io.papermc.paperlib'
@@ -121,6 +108,7 @@ shadowJar {
 jar.enabled = false
 assemble.dependsOn(shadowJar)
 
+// Utility tasks
 tasks.register('printProjectName') {
     doLast {
         println rootProject.name

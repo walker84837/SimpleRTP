@@ -1,20 +1,14 @@
-main: ${PACKAGE}.${NAME}
-name: ${NAME}
-version: "${VERSION}"
+main: org.winlogon.simplertp.SimpleRtp
+name: SimpleRtp
+version: "0.1.0"
 api-version: "1.21.1"
-author: AUTHOR
-description: DESCRIPTION
+author: winlogon
+description: Teleport to a random place, safely
 commands:
-  ex:
-    description: Base command for EXAMPLE
-    usage: "For a list of commands, type /ex help"
-    aliases: example
+  rtp:
+    description: "Random teleport :: Teleport to a random place"
+    usage: "Usage: /rtp [optional: range], example: /rtp 50000"
+    aliases: randomteleport
 permissions:
-  example.test:
-    description: DESCRIPTION
+  rtp.*:
     default: true
-  example.*:
-    description: Grants all other permissions
-    default: false
-    children:
-      example.test: true
