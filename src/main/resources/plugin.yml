@@ -7,7 +7,7 @@ description: Teleport to a random place, safely
 commands:
   rtp:
     description: "Random teleport :: Teleport to a random place"
-    usage: "Usage: /rtp [optional: range], example: /rtp 50000"
+    usage: "Usage: /rtp"
     aliases: randomteleport
 permissions:
   rtp.*:
