@@ -3,10 +3,10 @@ package org.winlogon.simplertp;
 import java.util.EnumSet;
 import java.util.Random;
 import java.util.Set;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.WorldBorder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,18 +22,12 @@ public class SimpleRtp extends JavaPlugin {
     private static final Set<Material> UNSAFE_BLOCKS = EnumSet.of(
             Material.LAVA, Material.WATER, Material.FIRE, Material.CACTUS, Material.MAGMA_BLOCK);
 
-    private static final int DEFAULT_RANGE = 50000;
-    private static final int MIN_RANGE = 1000;
-    private static final int MAX_RANGE = 1000000;
-    private static final int MAX_ATTEMPTS = 50;
-
-    private int maxAttempts;
-    private int defaultRange;
     private int minRange;
-    private int maxRange;
+    private int maxAttempts;
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         loadConfig();
         this.getCommand("rtp").setExecutor(this);
         getLogger().info("SimpleRtp has been enabled!");
@@ -45,82 +39,84 @@ public class SimpleRtp extends JavaPlugin {
     }
 
     private void loadConfig() {
-        // Save the default config if it doesn't exist
-        saveDefaultConfig();
-
-        // Load the configuration
         FileConfiguration config = getConfig();
+        minRange = config.getInt("min-range", 3000);
+        maxAttempts = config.getInt("max-attempts", 50);
+    }
 
-        // Set variables using defaults if not specified in config.yml
-        maxAttempts = config.getInt("max-attempts", MAX_ATTEMPTS);
-        defaultRange = config.getInt("default-range", DEFAULT_RANGE);
-        minRange = config.getInt("min-range", MIN_RANGE);
-        maxRange = config.getInt("max-range", MAX_RANGE);
+    private double getMaxRange(World world) {
+        WorldBorder border = world.getWorldBorder();
+        double defaultMaxRange = border.getSize() / 2;
+    
+        FileConfiguration config = getConfig();
+        double configMaxRange = config.getDouble("max-range", defaultMaxRange);
+    
+        // Clamp the range between minRange and defaultMaxRange
+        if (configMaxRange < minRange || configMaxRange > defaultMaxRange) {
+            getLogger().warning("Configured max-range (" + configMaxRange + ") for world '"
+                + world.getName() + "' is out of bounds. Clamping to valid range.");
+            configMaxRange = Math.max(minRange, Math.min(configMaxRange, defaultMaxRange));
+        }
+    
+        return configMaxRange;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command.");
+            sender.sendMessage(ChatColor.RED + "Only players can use this command.");
             return true;
         }
 
         Player player = (Player) sender;
-        int range = defaultRange;
 
-        if (args.length > 0) {
-            try {
-                range = Integer.parseInt(args[0]);
-                if (range < minRange || range > maxRange) {
-                    player.sendMessage("Range must be between " + minRange 
-                        + " and " + maxRange + ".");
-                    return true;
-                }
-            } catch (NumberFormatException e) {
-                player.sendMessage("Invalid range. Please provide a number between "
-                     + minRange + " and " + maxRange + ".");
-                return true;
-            }
-        }
+        World world = player.getWorld();
+        double maxRange = getMaxRange(world);
+
         if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
-            player.sendMessage("Usage: /rtp [range]");
-            player.sendMessage("If no range is provided, the default range will be used.");
-            player.sendMessage("The range must be between " + minRange + " and " + maxRange + ".");
+            player.sendMessage(ChatColor.GREEN + "Usage: /rtp");
+            player.sendMessage(ChatColor.AQUA + "Randomly teleports you to a safe location between "
+                + minRange + " and " + maxRange + " blocks.");
             return true;
         }
 
-        int finalRange = range;
+        Location safeLocation = findSafeLocation(world, maxRange);
 
-        // Run location finding asynchronously to avoid blocking the main thread
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            Location safeLocation = findSafeLocation(player.getWorld(), finalRange);
-
-            if (safeLocation != null) {
-                // Teleport the player back on the main thread
-                Bukkit.getScheduler().runTask(this, () -> {
-                    player.teleport(safeLocation);
-                    player.sendMessage("You have been teleported to a random safe location!");
-                });
-            } else {
-                player.sendMessage("Failed to find a safe location. Please try again.");
-            }
-        });
+        if (safeLocation != null) {
+            player.teleport(safeLocation);
+            player.sendMessage(ChatColor.GOLD + "You have been teleported to a random location.");
+        } else {
+            player.sendMessage(ChatColor.RED + "Failed to find a safe location. Please try again.");
+        }
 
         return true;
     }
 
-    private Location findSafeLocation(World world, int range) {
+    private Location findSafeLocation(World world, double maxRange) {
         Random random = new Random();
 
         for (int attempts = 0; attempts < maxAttempts; attempts++) {
-            int x = random.nextInt(range * 2) - range;
-            int z = random.nextInt(range * 2) - range;
+            int x = random.nextInt((int) maxRange * 2) - (int) maxRange;
+            int z = random.nextInt((int) maxRange * 2) - (int) maxRange;
 
-            // Calculate chunk coordinates
+            // Ensure the location is within the border
+            WorldBorder border = world.getWorldBorder();
+            if (!border.isInside(new Location(world, x, world.getHighestBlockYAt(x, z), z))) {
+                continue;
+            }
+
+            // Check if within the minimum range from spawn
+            Location spawn = world.getSpawnLocation();
+            Location randomLocation = new Location(world, x, spawn.getY(), z);
+
+            if (spawn.distanceSquared(randomLocation) < minRange * minRange) {
+                continue;
+            }
+
+            // Ensure chunk is loaded synchronously
             int chunkX = x >> 4;
             int chunkZ = z >> 4;
 
-            // Ensure the chunk is loaded
             if (!world.isChunkLoaded(chunkX, chunkZ)) {
                 world.loadChunk(chunkX, chunkZ);
             }
@@ -135,12 +131,9 @@ public class SimpleRtp extends JavaPlugin {
             if (isSafeBlock(blockBelow) && blockAtFeet == Material.AIR
                 && blockAtHead == Material.AIR) {
                 return potentialLocation;
-            } else {
-                world.unloadChunk(chunkX, chunkZ, false);
             }
         }
-
-        return null; // No safe location found within maxAttempts
+        return null; // No safe location found within max attempts
     }
 
     private boolean isSafeBlock(Material material) {

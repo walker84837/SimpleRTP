@@ -1,13 +1,8 @@
-# Configuration for SimpleRTP
+# Configuration for SimpleRtp
+
+# Range of distance to teleport a player
+min-range: 3000
+max-range: 50000
 
 # Maximum number of attempts to find a safe location
 max-attempts: 50
-
-# Default teleportation range
-default-range: 50000
-
-# Minimum range for teleportation
-min-range: 1000
-
-# Maximum range for teleportation
-max-range: 1000000
