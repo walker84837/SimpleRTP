@@ -24,6 +24,7 @@ public class SimpleRtp extends JavaPlugin {
 
     private int minRange;
     private int maxAttempts;
+    private FileConfiguration config;
 
     @Override
     public void onEnable() {
@@ -38,17 +39,29 @@ public class SimpleRtp extends JavaPlugin {
         getLogger().info("SimpleRtp has been disabled!");
     }
 
+    /**
+     * Loads the plugin configuration.
+     * 
+     * @return void
+     */
     private void loadConfig() {
-        FileConfiguration config = getConfig();
+        config = getConfig();
         minRange = config.getInt("min-range", 3000);
         maxAttempts = config.getInt("max-attempts", 50);
     }
 
+    /**
+     * Returns the maximum range for random location generation.
+     * The range is clamped between the minimum range and the default maximum range.
+     * 
+     * @param world The world to get the maximum range for
+     * @return The maximum range for random location generation
+     */
     private double getMaxRange(World world) {
         WorldBorder border = world.getWorldBorder();
         double defaultMaxRange = border.getSize() / 2;
     
-        FileConfiguration config = getConfig();
+        config = getConfig();
         double configMaxRange = config.getDouble("max-range", defaultMaxRange);
     
         // Clamp the range between minRange and defaultMaxRange
@@ -92,6 +105,13 @@ public class SimpleRtp extends JavaPlugin {
         return true;
     }
 
+    /**
+     * Finds a random safe location within the specified range.
+     * 
+     * @param world The world to search for safe locations
+     * @param maxRange The maximum range to search for safe locations
+     * @return A random safe location within the specified range, or null if no safe location is found
+     */
     private Location findSafeLocation(World world, double maxRange) {
         Random random = new Random();
 
@@ -136,6 +156,13 @@ public class SimpleRtp extends JavaPlugin {
         return null; // No safe location found within max attempts
     }
 
+    /**
+     * Checks if a block is safe to teleport to.
+     * 
+     * @param material The material of the block
+     * @return True if the block is safe, false otherwise
+     * @see UNSAFE_BLOCKS
+     */
     private boolean isSafeBlock(Material material) {
         return material.isSolid() && !UNSAFE_BLOCKS.contains(material);
     }
