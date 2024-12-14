@@ -60,17 +60,17 @@ public class SimpleRtp extends JavaPlugin {
     private double getMaxRange(World world) {
         WorldBorder border = world.getWorldBorder();
         double defaultMaxRange = border.getSize() / 2;
-    
+
         config = getConfig();
         double configMaxRange = config.getDouble("max-range", defaultMaxRange);
-    
+
         // Clamp the range between minRange and defaultMaxRange
         if (configMaxRange < minRange || configMaxRange > defaultMaxRange) {
             getLogger().warning("Configured max-range (" + configMaxRange + ") for world '"
-                + world.getName() + "' is out of bounds. Clamping to valid range.");
-            configMaxRange = Math.max(minRange, Math.min(configMaxRange, defaultMaxRange));
+                    + world.getName() + "' is out of bounds. Clamping to valid range.");
+            configMaxRange = Math.clamp(minRange, configMaxRange, defaultMaxRange);
         }
-    
+
         return configMaxRange;
     }
 
@@ -93,6 +93,7 @@ public class SimpleRtp extends JavaPlugin {
             return true;
         }
 
+        player.sendMessage(ChatColor.GOLD + "Finding a safe location to teleport you to...");
         Location safeLocation = findSafeLocation(world, maxRange);
 
         if (safeLocation != null) {
