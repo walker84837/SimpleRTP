@@ -41,7 +41,7 @@ public class SimpleRtp extends JavaPlugin {
 
     /**
      * Loads the plugin configuration.
-     * 
+
      * @return void
      */
     private void loadConfig() {
@@ -53,7 +53,7 @@ public class SimpleRtp extends JavaPlugin {
     /**
      * Returns the maximum range for random location generation.
      * The range is clamped between the minimum range and the default maximum range.
-     * 
+
      * @param world The world to get the maximum range for
      * @return The maximum range for random location generation
      */
@@ -108,10 +108,10 @@ public class SimpleRtp extends JavaPlugin {
 
     /**
      * Finds a random safe location within the specified range.
-     * 
+
      * @param world The world to search for safe locations
      * @param maxRange The maximum range to search for safe locations
-     * @return A random safe location within the specified range, or null if no safe location is found
+     * @return A random safe location within the range, or null if no safe location is found
      */
     private Location findSafeLocation(World world, double maxRange) {
         Random random = new Random();
@@ -159,7 +159,7 @@ public class SimpleRtp extends JavaPlugin {
 
     /**
      * Checks if a block is safe to teleport to.
-     * 
+
      * @param material The material of the block
      * @return True if the block is safe, false otherwise
      * @see UNSAFE_BLOCKS
