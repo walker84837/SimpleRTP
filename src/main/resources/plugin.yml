@@ -1,12 +1,12 @@
-main: org.winlogon.simplertp.SimpleRtp
+main: org.winlogon.simplertp.SimpleRTP
 name: SimpleRtp
 version: "0.1.0"
-api-version: "1.21.1"
+api-version: "1.21"
 author: winlogon
 description: Teleport to a random place, safely
 commands:
   rtp:
-    description: "Random teleport :: Teleport to a random place"
+    description: "SimpleRTP :: Teleport to a random place, safely."
     usage: "Usage: /rtp"
     aliases: randomteleport
 permissions:

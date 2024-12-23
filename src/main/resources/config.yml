@@ -1,4 +1,4 @@
-# Configuration for SimpleRtp
+# Configuration for SimpleRTP
 
 # Range of distance to teleport a player
 min-range: 3000
