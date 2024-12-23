@@ -31,18 +31,16 @@ public class SimpleRTP extends JavaPlugin {
         saveDefaultConfig();
         loadConfig();
         this.getCommand("rtp").setExecutor(this);
-        getLogger().info("SimpleRTP has been enabled!");
+        getLogger().info("§aSimpleRTP has been enabled!");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("SimpleRTP has been disabled!");
+        getLogger().info("§cSimpleRTP has been disabled!");
     }
 
     /**
      * Loads the plugin configuration.
-
-     * @return void
      */
     private void loadConfig() {
         config = getConfig();
@@ -53,7 +51,7 @@ public class SimpleRTP extends JavaPlugin {
     /**
      * Returns the maximum range for random location generation.
      * The range is clamped between the minimum range and the default maximum range.
-
+     *
      * @param world The world to get the maximum range for
      * @return The maximum range for random location generation
      */
@@ -66,9 +64,9 @@ public class SimpleRTP extends JavaPlugin {
 
         // Clamp the range between minRange and defaultMaxRange
         if (configMaxRange < minRange || configMaxRange > defaultMaxRange) {
-            getLogger().warning("Configured max-range (" + configMaxRange + ") for world '"
-                    + world.getName() + "' is out of bounds. Clamping to valid range.");
-            configMaxRange = Math.clamp(minRange, configMaxRange, defaultMaxRange);
+            getLogger().warning("§7Configured max-range (§3" + configMaxRange + "§7) for world §2"
+                + world.getName() + "§7 is out of bounds. Clamping to valid range.");
+            configMaxRange = Math.max(minRange, Math.min(configMaxRange, defaultMaxRange));
         }
 
         return configMaxRange;
@@ -77,7 +75,7 @@ public class SimpleRTP extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "Only players can use this command.");
+            sender.sendMessage("§cError§7: Only players can use this command.");
             return true;
         }
 
@@ -87,20 +85,20 @@ public class SimpleRTP extends JavaPlugin {
         double maxRange = getMaxRange(world);
 
         if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
-            player.sendMessage(ChatColor.GREEN + "Usage: /rtp");
-            player.sendMessage(ChatColor.AQUA + "Randomly teleports you to a safe location between "
-                + minRange + " and " + maxRange + " blocks.");
+            player.sendMessage("§aUsage§7: /rtp");
+            player.sendMessage("§7Randomly teleports you to a safe location between §3" + minRange
+                + "§7 and §3" + maxRange + "§7 blocks.");
             return true;
         }
 
-        player.sendMessage(ChatColor.GOLD + "Finding a safe location to teleport you to...");
+        player.sendMessage("§7Finding a safe location to teleport you to...");
         Location safeLocation = findSafeLocation(world, maxRange);
 
         if (safeLocation != null) {
             player.teleport(safeLocation);
-            player.sendMessage(ChatColor.GOLD + "You have been teleported to a random location.");
+            player.sendMessage("§7You have been teleported to a random location §3successfully§7.");
         } else {
-            player.sendMessage(ChatColor.RED + "Failed to find a safe location. Please try again.");
+            player.sendMessage("§cError§7: Failed to find a safe location. Please try again.");
         }
 
         return true;
@@ -108,7 +106,7 @@ public class SimpleRTP extends JavaPlugin {
 
     /**
      * Finds a random safe location within the specified range.
-
+     *
      * @param world The world to search for safe locations
      * @param maxRange The maximum range to search for safe locations
      * @return A random safe location within the range, or null if no safe location is found
@@ -159,7 +157,7 @@ public class SimpleRTP extends JavaPlugin {
 
     /**
      * Checks if a block is safe to teleport to.
-
+     *
      * @param material The material of the block
      * @return True if the block is safe, false otherwise
      * @see UNSAFE_BLOCKS
