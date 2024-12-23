@@ -17,7 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * SimpleRTP is a plugin for Bukkit that allows players to teleport
  * to random safe locations within a specified range.
  */
-public class SimpleRtp extends JavaPlugin {
+public class SimpleRTP extends JavaPlugin {
 
     private static final Set<Material> UNSAFE_BLOCKS = EnumSet.of(
             Material.LAVA, Material.WATER, Material.FIRE, Material.CACTUS, Material.MAGMA_BLOCK);
@@ -31,12 +31,12 @@ public class SimpleRtp extends JavaPlugin {
         saveDefaultConfig();
         loadConfig();
         this.getCommand("rtp").setExecutor(this);
-        getLogger().info("SimpleRtp has been enabled!");
+        getLogger().info("SimpleRTP has been enabled!");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("SimpleRtp has been disabled!");
+        getLogger().info("SimpleRTP has been disabled!");
     }
 
     /**
