@@ -1,31 +1,20 @@
-# SimpleRtp
+# SimpleRTP
 
 > A Bukkit plugin for random teleportation to safe locations
 
-SimpleRtp is a plugin for Bukkit that allows players to teleport to random safe locations within a specified range. This plugin is designed to provide a fun and exciting way for players to explore their Minecraft world.
+SimpleRTP is a plugin for Bukkit that allows players to teleport to random safe locations within a specified range. This plugin is designed to provide a fun and exciting way for players to explore their Minecraft world.
 
-## Installing / Getting started
+## Installing / Compile from source
 
-To install SimpleRtp, simply download the plugin and place it in your Bukkit server's plugins directory. Then, restart your server and the plugin will be enabled.
-
-```shell
-wget https://github.com/walker84837/SimpleRtp/releases/download/v0.1.0/SimpleRtp.jar
-mv SimpleRtp.jar /path/to/bukkit/plugins/
-```
-
-Once installed, players can use the `/rtp` command to teleport to a random safe location.
-
-## Developing
-
-To develop SimpleRtp further, you can clone the repository and build the plugin using Gradle.
+To use SimpleRTP, you can clone the repository and build the plugin using Gradle.
 
 ```shell
-git clone https://github.com/walker84837/SimpleRtp.git
-cd SimpleRtp/
+git clone https://github.com/walker84837/SimpleRTP.git
+cd SimpleRTP/
 ./gradlew build
 ```
 
-This will create a `SimpleRtp.jar` file in the `build/libs` directory, which you can then use to update your server.
+This will create a `SimpleRTP.jar` file in the `build/libs` directory, which you can then use to update your server.
 
 ### Building
 
@@ -35,11 +24,11 @@ To build the plugin, you will need to have Gradle installed on your system. Once
 ./gradlew build
 ```
 
-This will create a `SimpleRtp.jar` file in the `target` directory.
+This will create a `SimpleRTP.jar` file in the `target` directory.
 
 ## Features
 
-SimpleRtp provides the following features:
+SimpleRTP provides the following features:
 
 * Random teleportation to safe locations within a specified range
 * Configurable minimum and maximum range
@@ -48,7 +37,7 @@ SimpleRtp provides the following features:
 
 ## Configuration
 
-SimpleRtp can be configured using the following options:
+SimpleRTP can be configured using the following options:
 
 |Value|Type|Default|Description|
 |---|---|---|
@@ -58,13 +47,13 @@ SimpleRtp can be configured using the following options:
 
 ## Contributing
 
-If you'd like to contribute to SimpleRtp, please fork the repository and use a feature branch. Pull requests are warmly welcome. Please see the `CONTRIBUTING.md` file for more information on how to contribute.
+If you'd like to contribute to SimpleRTP, please fork the repository and use a feature branch. Pull requests are warmly welcome. Please see the `CONTRIBUTING.md` file for more information on how to contribute.
 
 ## Links
 
-* Project homepage: https://github.com/walker84837/SimpleRtp/
-* Repository: https://github.com/walker84837/SimpleRtp/
-* Issue tracker: https://github.com/walker84837/SimpleRtp/issues
+* Project homepage: https://github.com/walker84837/SimpleRTP/
+* Repository: https://github.com/walker84837/SimpleRTP/
+* Issue tracker: https://github.com/walker84837/SimpleRTP/issues
 
 ## Licensing
 
