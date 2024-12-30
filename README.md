@@ -40,7 +40,7 @@ SimpleRTP provides the following features:
 SimpleRTP can be configured using the following options:
 
 |Value|Type|Default|Description|
-|---|---|---|
+|---|---|---|---|
 |min-range|Integer|3000|The minimum range in blocks that the player will be teleported from the spawn point.|
 |max-range|Integer|World border size / 2|The maximum range in blocks that the player will be teleported from the spawn point.|
 |max-attempts|Integer|50|The maximum number of attempts to find a safe location.|
