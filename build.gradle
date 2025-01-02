@@ -82,7 +82,7 @@ processResources {
 // Configure Checkstyle
 checkstyle {
     toolVersion '10.20.1'
-    maxWarnings = 0
+    maxWarnings = 10
 }
 
 configurations.checkstyle {

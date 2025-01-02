@@ -3,6 +3,11 @@ package org.winlogon.simplertp;
 import java.util.EnumSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.bukkit.Bukkit;
+import org.bukkit.HeightMap;
+import org.bukkit.RegionAccessor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -12,12 +17,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
 
 /**
  * SimpleRTP is a plugin for Bukkit that allows players to teleport
  * to random safe locations within a specified range.
  */
-public class SimpleRTP extends JavaPlugin {
+public class SimpleRtp extends JavaPlugin {
 
     private static final Set<Material> UNSAFE_BLOCKS = EnumSet.of(
             Material.LAVA, Material.WATER, Material.FIRE, Material.CACTUS, Material.MAGMA_BLOCK);
@@ -120,7 +126,14 @@ public class SimpleRTP extends JavaPlugin {
 
             // Ensure the location is within the border
             WorldBorder border = world.getWorldBorder();
-            if (!border.isInside(new Location(world, x, world.getHighestBlockYAt(x, z), z))) {
+            int y = 0;
+            if (isFolia()) {
+                y = getHighestBlockYAtAsync(x, z, world);
+            } else {
+                y = world.getHighestBlockYAt(x, z);
+            }
+            
+            if (!border.isInside(new Location(world, x, y, z))) {
                 continue;
             }
 
@@ -137,12 +150,18 @@ public class SimpleRTP extends JavaPlugin {
             int chunkZ = z >> 4;
 
             if (!world.isChunkLoaded(chunkX, chunkZ)) {
-                world.loadChunk(chunkX, chunkZ);
+                if (isFolia()) {
+                    RegionScheduler scheduler = Bukkit.getRegionScheduler();
+                    scheduler.execute(this, randomLocation, () -> world.loadChunk(chunkX, chunkZ));
+                } else {
+                    world.loadChunk(chunkX, chunkZ);
+                }
             }
 
-            int highestY = world.getHighestBlockYAt(x, z);
+            int highestY = getHighestBlockYAtAsync(x, z, world);
             Location potentialLocation = new Location(world, x + 0.5, highestY + 1, z + 0.5);
 
+            // cant do anything async here for no fucking reason
             Material blockBelow = world.getBlockAt(x, highestY, z).getType();
             Material blockAtFeet = world.getBlockAt(x, highestY + 1, z).getType();
             Material blockAtHead = world.getBlockAt(x, highestY + 2, z).getType();
@@ -164,5 +183,26 @@ public class SimpleRTP extends JavaPlugin {
      */
     private boolean isSafeBlock(Material material) {
         return material.isSolid() && !UNSAFE_BLOCKS.contains(material);
+    }
+
+    private int getHighestBlockYAtAsync(int x, int z, World world) {
+        RegionScheduler scheduler = Bukkit.getRegionScheduler();
+
+        AtomicInteger y = new AtomicInteger();
+        RegionAccessor regionAccessor = (RegionAccessor) world;
+
+        scheduler.execute(this, new Location(world, x, 0, z), () -> {
+            y.set(regionAccessor.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING));
+        });
+        return y.get();
+    }
+
+    private static boolean isFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }
